@@ -1,2 +1,3 @@
-# HTMLForge.jl
-HTML tools for parsing and manipulation in Julia Programming Language
+# HTMLForge
+
+[![Build Status](https://github.com/algunion/HTMLForge.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/algunion/HTMLForge.jl/actions/workflows/CI.yml?query=branch%3Amaster)
