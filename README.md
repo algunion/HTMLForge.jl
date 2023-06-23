@@ -1,7 +1,5 @@
 # HTMLForge.jl
 
-[![version](https://juliahub.com/docs/HTMLForge/version.svg)](https://juliahub.com/ui/Packages/HTMLForge/mllB2) [![Build Status](https://travis-ci.org/JuliaWeb/HTMLForge.jl.svg?branch=master)](https://travis-ci.org/JuliaWeb/HTMLForge.jl) [![codecov.io](http://codecov.io/github/JuliaWeb/HTMLForge.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaWeb/HTMLForge.jl?branch=master) [![pkgeval](https://juliahub.com/docs/HTMLForge/pkgeval.svg)](https://juliahub.com/ui/Packages/HTMLForge/mllB2) [![deps](https://juliahub.com/docs/HTMLForge/deps.svg)](https://juliahub.com/ui/Packages/HTMLForge/mllB2?t=2)
-
 HTMLForge.jl is a Julia wrapper around
 [Google's Gumbo library](https://github.com/google/gumbo-parser) for
 parsing HTML.
