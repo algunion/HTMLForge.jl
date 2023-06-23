@@ -15,6 +15,7 @@ Getting started is very easy:
 julia> using HTMLForge
 
 julia> parsehtml("<h1> Hello, world! </h1>")
+"""
 HTML Document:
 <!DOCTYPE >
 HTMLElement{:HTML}:
@@ -26,6 +27,7 @@ HTMLElement{:HTML}:
     </h1>
   </body>
 </HTML>
+"""
 ```
 
 Read on for further documentation.
@@ -110,8 +112,8 @@ constructed as follows:
 
 ```julia
 julia> HTMLElement(:div)
-HTMLElement{:div}:
-<div></div>
+# HTMLElement{:div}:
+# <div></div>
 ```
 
 `HTMLElement`s have a `parent` field, which refers to another
@@ -161,6 +163,7 @@ Represents text appearing in an HTML document. For example:
 
 ```julia
 julia> doc = parsehtml("<h1> Hello, world! </h1>")
+"""
 HTML Document:
 <!DOCTYPE >
 HTMLElement{:HTML}:
@@ -175,6 +178,7 @@ HTMLElement{:HTML}:
 
 julia> doc.root[2][1][1]
 HTML Text:  Hello, world!
+"""
 ```
 
 This type is quite simple, just a reference to its parent and the
@@ -196,57 +200,55 @@ Use the iterators defined in
 [AbstractTrees.jl](https://github.com/Keno/AbstractTrees.jl/), e.g.:
 
 ```julia
-julia> using AbstractTrees
+using AbstractTrees
 
-julia> using HTMLForge
+using HTMLForge
 
-julia> doc = parsehtml("""
-                     <html>
-                       <body>
-                         <div>
-                           <p></p> <a></a> <p></p>
-                         </div>
-                         <div>
-                            <span></span>
-                         </div>
-                        </body>
-                     </html>
-                     """);
+doc = parsehtml("""
+                <html>
+                  <body>
+                    <div>
+                      <p></p> <a></a> <p></p>
+                    </div>
+                    <div>
+                      <span></span>
+                    </div>
+                  </body>
+                </html>
+                """);
 
-julia> for elem in PreOrderDFS(doc.root) println(tag(elem)) end
-HTML
-head
-body
-div
-p
-a
-p
-div
-span
+for elem in PreOrderDFS(doc.root) println(tag(elem)) end
+# HTML
+# head
+# body
+# div
+# p
+# a
+# p
+# div
+# span
 
-julia> for elem in PostOrderDFS(doc.root) println(tag(elem)) end
-head
-p
-a
-p
-div
-span
-div
-body
-HTML
+for elem in PostOrderDFS(doc.root) println(tag(elem)) end
+# head
+# p
+# a
+# p
+# div
+# span
+# div
+# body
+# HTML
 
-julia> for elem in StatelessBFS(doc.root) println(tag(elem)) end
-HTML
-head
-body
-div
-div
-p
-a
-p
-span
-
-julia>
+for elem in StatelessBFS(doc.root) println(tag(elem)) end
+# HTML
+# head
+# body
+# div
+# div
+# p
+# a
+# p
+# span
 ```
 
 ## TODOS
