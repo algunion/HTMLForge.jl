@@ -1,7 +1,7 @@
 name = "HTMLForge"
 uuid = "3f2c3872-777a-411d-b946-15b25a70da51"
 authors = ["Marius Fersigan <marius.fersigan@gmail.com> and contributors"]
-version = "0.8.2"
+version = "0.1.0"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -9,6 +9,8 @@ Gumbo_jll = "528830af-5a63-567c-a44a-034ed33b8444"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [compat]
+AbstractTrees = "0.2, 0.3, 0.4"
+Gumbo_jll = "0.10"
 julia = "1.8"
 
 [extras]
