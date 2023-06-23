@@ -5,9 +5,9 @@ In the current state, HTMLForge.jl is a Julia wrapper around
 parsing HTML.
 
 ### Important Note
-HTMLForge is a continuation of the Gumbo.jl project, which was a Julia wrapper around the Gumbo C library.
+HTMLForge is a continuation of the Gumbo.jl project, which is a Julia wrapper around the Gumbo C library.
 
-Gumbo C library is no longer maintained, and HTMLForge is a fork of Gumbo.jl with the aim of maintaining the API of the original package while slowly removing C Gumbo dependency (since the renaming). If you were using Gumbo.jl, you should be able to switch to HTMLForge.jl with no changes to your code.
+Gumbo C library is no longer maintained, and HTMLForge is a fork of Gumbo.jl with the aim of maintaining the API of the original package while slowly removing C Gumbo dependency (since the renaming) and extending its functionality. If you were using Gumbo.jl, you should be able to switch to HTMLForge.jl with no changes to your code.
 
 The long term plan is to make HTMLForge a pure Julia library, but for now it is a wrapper around the C library. Alternatively, we can consider switching to a different C/Rust library that is still maintained.
 
