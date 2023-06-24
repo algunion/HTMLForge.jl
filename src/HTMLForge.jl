@@ -24,6 +24,7 @@ export HTMLElement,
 include("htmltypes.jl")
 include("manipulation.jl")
 include("comparison.jl")
+include("htmx.jl")
 include("io.jl")
 include("conversion.jl")
 

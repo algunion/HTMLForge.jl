@@ -17,7 +17,7 @@ hasattr(elem::HTMLElement, name) = name in keys(attrs(elem))
 
 
 AbstractTrees.children(elem::HTMLElement) = elem.children
-AbstractTrees.children(elem::HTMLText) = ()
+AbstractTrees.children(::HTMLText) = ()
 
 # TODO there is a naming conflict here if you want to use both packages
 # (see https://github.com/JuliaWeb/Gumbo.jl/issues/31)
