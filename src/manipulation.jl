@@ -45,6 +45,7 @@ end
 getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id) :: Union{HTMLElement, Nothing}
 getbyid(elem::HTMLElement, id::AbstractString) = findfirst(x -> hasattr(x, "id") && getattr(x, "id") == id, elem) :: Union{HTMLElement, Nothing}
 
+applyif!(condition::Function, f!::Function, doc::HTMLDocument) = applyif!(condition, f!, doc.root)
 function applyif!(condition::Function, f!::Function, elem::HTMLElement)
     for el in AbstractTrees.StatelessBFS(elem)
         el isa HTMLElement && condition(el) && f!(el)        
