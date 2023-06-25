@@ -15,6 +15,9 @@ export HTMLElement,
        hasattr,
        getattr,
        setattr!,
+       findfirst,
+       getbyid,
+       applyif!,
        parsehtml,
        postorder,
        preorder,
@@ -24,6 +27,7 @@ export HTMLElement,
 include("htmltypes.jl")
 include("manipulation.jl")
 include("comparison.jl")
+include("htmx.jl")
 include("io.jl")
 include("conversion.jl")
 

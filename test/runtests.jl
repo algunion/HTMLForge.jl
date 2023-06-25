@@ -1,6 +1,8 @@
 using Test
 using HTMLForge
 
+testdir = dirname(@__FILE__)
+
 include("basics.jl")
 include("comparison.jl")
 include("parsing.jl")

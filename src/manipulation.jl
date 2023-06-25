@@ -17,7 +17,7 @@ hasattr(elem::HTMLElement, name) = name in keys(attrs(elem))
 
 
 AbstractTrees.children(elem::HTMLElement) = elem.children
-AbstractTrees.children(elem::HTMLText) = ()
+AbstractTrees.children(::HTMLText) = ()
 
 # TODO there is a naming conflict here if you want to use both packages
 # (see https://github.com/JuliaWeb/Gumbo.jl/issues/31)
@@ -32,6 +32,25 @@ Base.getindex(elem::HTMLElement,i) = getindex(elem.children,i)
 Base.setindex!(elem::HTMLElement,i,val) = setindex!(elem.children,i,val)
 
 Base.push!(elem::HTMLElement,val) = push!(elem.children, val)
+
+findfirst(f::Function, doc::HTMLDocument) :: Union{HTMLElement, Nothing} = findfirst(f, doc.root)
+function findfirst(f::Function, elem::HTMLElement) :: Union{HTMLElement, Nothing}
+    for el in AbstractTrees.StatelessBFS(elem)
+        el isa HTMLElement && f(el) && return el        
+    end
+    return nothing
+end
+
+# more utility functions
+getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id) :: Union{HTMLElement, Nothing}
+getbyid(elem::HTMLElement, id::AbstractString) = findfirst(x -> hasattr(x, "id") && getattr(x, "id") == id, elem) :: Union{HTMLElement, Nothing}
+
+applyif!(condition::Function, f!::Function, doc::HTMLDocument) = applyif!(condition, f!, doc.root)
+function applyif!(condition::Function, f!::Function, elem::HTMLElement)
+    for el in AbstractTrees.StatelessBFS(elem)
+        el isa HTMLElement && condition(el) && f!(el)        
+    end    
+end
 
 
 # text
