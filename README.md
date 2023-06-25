@@ -12,7 +12,7 @@ Gumbo C library is no longer maintained, and HTMLForge is a fork of Gumbo.jl wit
 ### The long term plan
 The long term plan is to make HTMLForge a pure Julia library. Alternatively, we can consider switching to a different C/Rust library that is still maintained.
 
-Another goal is to make HTMX support a first class citizen in HTMLForge.
+Another goal is to make HTMX a first class citizen in HTMLForge - by adding types, functions and relevant syntax sugar to make it easy to work with HTMX in Julia/HTMLForge.
 
 ### Getting started
 Getting started is very easy:
