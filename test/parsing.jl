@@ -1,6 +1,6 @@
 # basic test that parsing works correctly
 
-testdir = dirname(@__FILE__)
+
 
 @test_throws HTMLForge.InvalidHTMLException parsehtml("", strict=true)
 
