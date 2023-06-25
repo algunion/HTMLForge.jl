@@ -27,3 +27,5 @@ end
 struct InvalidHTMLException <: Exception
     msg::AbstractString
 end
+
+
