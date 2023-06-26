@@ -11,6 +11,8 @@
 
 import Base: ==, isequal, hash
 
+isequal(x::NullNode, y::NullNode) = true
+
 isequal(x::HTMLDocument, y::HTMLDocument) =
     isequal(x.doctype,y.doctype) && isequal(x.root,y.root)
 
@@ -45,3 +47,4 @@ function hash(elem::HTMLElement{T}) where {T}
 end
 
 hash(t::HTMLText) = hash(hash(HTMLText),hash(t.text))
+hash(n::NullNode) = hash(NullNode)

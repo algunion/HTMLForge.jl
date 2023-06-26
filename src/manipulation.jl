@@ -78,7 +78,7 @@ Base.getindex(elem::HTMLElement,i) = getindex(elem.children,i)
 Set the `i`th child of an element.
 """
 function Base.setindex!(elem::HTMLElement,i,val)
-    if !val.parent == elem
+    if val.parent != elem
         val.parent = elem
     end
     setindex!(elem.children,i,val)
@@ -90,7 +90,7 @@ end
 Push a child onto an element.
 """
 function Base.push!(elem::HTMLElement,val)
-    if !val.parent == elem
+    if val.parent != elem
         val.parent = elem
     end
     push!(elem.children, val)
