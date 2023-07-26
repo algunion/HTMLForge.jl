@@ -4,8 +4,8 @@ import HTMLForge: HTMLNode, NullNode, findfirst
 
 # convenience constructor works
 @test HTMLElement(:body) == HTMLElement{:body}(HTMLNode[],
-                                               NullNode(),
-                                               Dict{AbstractString,AbstractString}())
+    NullNode(),
+    Dict{AbstractString,AbstractString}())
 
 # accessing tags works
 @test HTMLElement(:body) |> tag == :body
@@ -15,7 +15,6 @@ let
     @test getattr(elem, "foo") == "bar"
     @test getattr(elem, "foo", "baz") == "bar"
     @test getattr(elem, "bar", "qux") == "qux"
-    @test getattr(() -> "qux", elem, "bar") == "qux"
 end
 
 @testset "HTML manipulation" begin
@@ -23,7 +22,7 @@ end
         read(attrstest, String) |> parsehtml
     end
     @test doc.root |> tag == :HTML
-    @test findfirst(x ->  hasattr(x, "id") && getattr(x, "id") == "myid", doc.root) |> tag == :p
+    @test findfirst(x -> hasattr(x, "id") && getattr(x, "id") == "myid", doc.root) |> tag == :p
     @test getbyid(doc.root, "myid") |> tag == :p
     applyif!(x -> x |> tag == :div, x -> setattr!(x, "class", "wide"), doc.root)
     @test findfirst(x -> hasattr(x, "class") && getattr(x, "class") == "wide", doc.root) |> tag == :div

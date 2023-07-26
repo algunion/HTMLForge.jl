@@ -12,22 +12,28 @@ tag(::HTMLElement{T}) where {T} = T
 
 
 """
-    text(elem::HTMLText)
+    attrs(elem::HTMLElement) :: Dict{String, String}
 
-Get the text of a text element.
+Get the attributes of an element.
 """
 attrs(elem::HTMLElement) = elem.attributes
+
+"""
+    setattrs!(elem::HTMLElement, name::AbstractString, value::AbstractString)
+
+Set the attributes of an element.
+"""
 function setattr!(elem::HTMLElement, name::AbstractString, value::AbstractString)
     elem.attributes[name] = value
 end
 
 
 """
-    getattr(elem::HTMLElement, name::AbstractString) :: AbstractString
+    getattr(elem::HTMLElement, name::AbstractString) :: Union{AbstractString, Nothing}
 
 Get the value of an attribute of an element.
 """
-getattr(elem::HTMLElement, name) = elem.attributes[name]
+getattr(elem::HTMLElement, name) = hasattr(elem, name) ? elem.attributes[name] : nothing
 
 """
     getattr(elem::HTMLElement, name::AbstractString, default::AbstractString) :: AbstractString
@@ -35,13 +41,6 @@ getattr(elem::HTMLElement, name) = elem.attributes[name]
 Get the value of an attribute of an element, or a default value if the attribute is not present.
 """
 getattr(elem::HTMLElement, name, default) = get(elem.attributes, name, default)
-
-"""
-    hasattr(elem::HTMLElement, name::AbstractString) :: Bool
-
-Get the value of an attribute of an element, or the output returned by`f()` if the attribute is not present.
-"""
-getattr(f::Function, elem::HTMLElement, name) = get(f, elem.attributes, name)
 
 
 """
@@ -70,18 +69,18 @@ children = AbstractTrees.children
 
 Get the `i`th child of an element.
 """
-Base.getindex(elem::HTMLElement,i) = getindex(elem.children,i)
+Base.getindex(elem::HTMLElement, i) = getindex(elem.children, i)
 
 """
     setindex!(elem::HTMLElement, i::Integer, val::HTMLElement)
 
 Set the `i`th child of an element.
 """
-function Base.setindex!(elem::HTMLElement,i,val)
+function Base.setindex!(elem::HTMLElement, i, val)
     if val.parent != elem
         val.parent = elem
     end
-    setindex!(elem.children,i,val)
+    setindex!(elem.children, i, val)
 end
 
 """
@@ -89,7 +88,7 @@ end
 
 Push a child onto an element.
 """
-function Base.push!(elem::HTMLElement,val)
+function Base.push!(elem::HTMLElement, val)
     if val.parent != elem
         val.parent = elem
     end
@@ -102,16 +101,16 @@ end
 
 Find the first element in `doc` for which `f` is true.
 """
-findfirst(f::Function, doc::HTMLDocument) :: Union{HTMLElement, Nothing} = findfirst(f, doc.root)
+findfirst(f::Function, doc::HTMLDocument)::Union{HTMLElement,Nothing} = findfirst(f, doc.root)
 
 """
     findfirst(f::Function, elem::HTMLElement) :: Union{HTMLElement, Nothing}
 
 Find the first element in `elem` for which `f` is true.
 """
-function findfirst(f::Function, elem::HTMLElement) :: Union{HTMLElement, Nothing}
-    for el in AbstractTrees.StatelessBFS(elem)
-        el isa HTMLElement && f(el) && return el        
+function findfirst(f::Function, elem::HTMLElement)::Union{HTMLElement,Nothing}
+    for el in AbstractTrees.PreOrderDFS(elem)
+        el isa HTMLElement && f(el) && return el
     end
     return nothing
 end
@@ -123,7 +122,7 @@ end
 
 Get the element with the given `id` from `doc`.
 """
-getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id) :: Union{HTMLElement, Nothing}
+getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id)::Union{HTMLElement,Nothing}
 
 
 """
@@ -131,7 +130,7 @@ getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id) :: Union{
 
 Get the element with the given `id` from `elem`.
 """
-getbyid(elem::HTMLElement, id::AbstractString) = findfirst(x -> hasattr(x, "id") && getattr(x, "id") == id, elem) :: Union{HTMLElement, Nothing}
+getbyid(elem::HTMLElement, id::AbstractString) = findfirst(x -> hasattr(x, "id") && getattr(x, "id") == id, elem)::Union{HTMLElement,Nothing}
 
 
 """
@@ -148,9 +147,9 @@ applyif!(condition::Function, f!::Function, doc::HTMLDocument) = applyif!(condit
 Apply `f!` to all elements (nested included) in `elem` for which `condition` is true.
 """
 function applyif!(condition::Function, f!::Function, elem::HTMLElement)
-    for el in AbstractTrees.StatelessBFS(elem)
-        el isa HTMLElement && condition(el) && f!(el)        
-    end    
+    for el in AbstractTrees.PreOrderDFS(elem)
+        el isa HTMLElement && condition(el) && f!(el)
+    end
 end
 
 
@@ -159,8 +158,8 @@ end
 
 Returns `true` if `elem` has the class `cls`.
 """
-function hasclass(elem::HTMLElement, cls::AbstractString) :: Bool
-    hasattr(elem, "class") && cls in split(getattr(elem, "class", ""))    
+function hasclass(elem::HTMLElement, cls::AbstractString)::Bool
+    hasattr(elem, "class") && cls in split(getattr(elem, "class", ""))
 end
 
 
