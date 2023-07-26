@@ -4,15 +4,15 @@ const HIPHENATED = Dict(:pushurl => Symbol("push-url"), :selectoob => Symbol("se
 _hyphenate(x::Symbol) = haskey(HIPHENATED, x) ? HIPHENATED[x] : x
 
 function hx(el::HTMLElement; kw...)
-    hxattrs = Dict("hx-$(_hyphenate(Symbol(k)))" => string(v) for (k,v) in kw) 
+    hxattrs = Dict("hx-$(_hyphenate(Symbol(k)))" => string(v) for (k, v) in kw)
     HTMLElement{tag(el)}(el.children, el.parent, merge(attrs(el), hxattrs))
 end
 
 Base.propertynames(::Type{hx}) = HTMX_ATTRS
-function Base.getproperty(::Type{hx}, name::Symbol) 
+function Base.getproperty(::Type{hx}, name::Symbol)
     if name in HTMX_ATTRS
         _hyphenate(name)
-    else 
+    else
         error("hx does not have property $name")
     end
 end

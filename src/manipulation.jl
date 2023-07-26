@@ -187,6 +187,12 @@ function removeclass!(elem::HTMLElement, cls::AbstractString)
     end
 end
 
+function replaceclass!(elem::HTMLElement, old::AbstractString, new::AbstractString)
+    if hasclass(elem, old)
+        setattr!(elem, "class", join(filter(x -> x != old, split(getattr(elem, "class", ""))), " ") * " " * new)
+    end
+end
+
 # text
 
 """

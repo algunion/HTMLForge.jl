@@ -33,4 +33,8 @@ end
     @test hasclass(doc.root, "narrow")
     removeclass!(doc.root, "narrow")
     @test !hasclass(doc.root, "narrow")
+    addclass!(doc.root, "narrow")
+    addclass!(doc.root, "another")
+    replaceclass!(doc.root, "narrow", "wide")
+    @test hasclass(doc.root, "wide")
 end
