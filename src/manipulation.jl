@@ -62,6 +62,26 @@ AbstractTrees.children(::HTMLText) = ()
 
 children = AbstractTrees.children
 
+# getting the length of an element gets the length of its children
+
+"""
+    length(elem::HTMLElement)
+
+Get the `length` of `elem`'s children.
+"""
+Base.length(elem::HTMLElement) = length(elem.children)
+
+# getting the length of HTMLText gets the length of its text content.
+
+"""
+    length:text::HTMLText)
+
+Get the `length` of text content.
+"""
+Base.length(text::HTMLText) = length(text.text)
+
+
+
 # indexing into an element indexes into its children
 
 """
@@ -99,14 +119,14 @@ end
 """
     findfirst(f::Function, doc::HTMLDocument) :: Union{HTMLElement, Nothing}
 
-Find the first element in `doc` for which `f` is true.
+Find the first (PreOrderDFS) element in `doc` for which `f` is true.
 """
 findfirst(f::Function, doc::HTMLDocument)::Union{HTMLElement,Nothing} = findfirst(f, doc.root)
 
 """
     findfirst(f::Function, elem::HTMLElement) :: Union{HTMLElement, Nothing}
 
-Find the first element in `elem` for which `f` is true.
+Find the first (PreOrderDFS) element in `elem` for which `f` is true.
 """
 function findfirst(f::Function, elem::HTMLElement)::Union{HTMLElement,Nothing}
     for el in AbstractTrees.PreOrderDFS(elem)
@@ -192,6 +212,20 @@ function replaceclass!(elem::HTMLElement, old::AbstractString, new::AbstractStri
         setattr!(elem, "class", join(filter(x -> x != old, split(getattr(elem, "class", ""))), " ") * " " * new)
     end
 end
+
+
+function _firsttag(el::HTMLElement, t)
+    findfirst(x -> tag(x) === t, el)
+end
+
+# body
+body(el::HTMLElement)::Union{HTMLElement,Nothing} = _firsttag(el, :body)
+body(doc::HTMLDocument)::Union{HTMLElement,Nothing} = body(doc.root)
+
+#head
+head(el::HTMLElement)::Union{HTMLElement,Nothing} = _firsttag(el, :head)
+head(doc::HTMLDocument)::Union{HTMLElement,Nothing} = head(doc.root)
+
 
 # text
 
