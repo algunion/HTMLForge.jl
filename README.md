@@ -1,7 +1,7 @@
 # HTMLForge.jl
 
 In the current state, HTMLForge.jl is a Julia wrapper around
-[Google's Gumbo library](https://codeberg.org/gumbo-parser/gumbo-parser) for
+[Gumbo library](https://codeberg.org/gumbo-parser/gumbo-parser) for
 parsing HTML.
 
 ## Important Note
