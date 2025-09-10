@@ -1,20 +1,15 @@
 # HTMLForge.jl
 
 In the current state, HTMLForge.jl is a Julia wrapper around
-[Google's Gumbo library](https://github.com/google/gumbo-parser) for
+[Google's Gumbo library](https://codeberg.org/gumbo-parser/gumbo-parser) for
 parsing HTML.
 
-### Important Note
-HTMLForge is a continuation of the Gumbo.jl project, which is a Julia wrapper around the Gumbo C library.
+## Important Note
 
-Gumbo C library is no longer maintained, and HTMLForge is a fork of Gumbo.jl with the aim of maintaining the API of the original package while slowly removing C Gumbo dependency (since the renaming) and extending its functionality. If you were using Gumbo.jl, you should be able to switch to HTMLForge.jl with no changes to your code.
-
-### The long term plan
-The long term plan is to make HTMLForge a pure Julia library. Alternatively, we can consider switching to a different C/Rust library that is still maintained.
-
-Another goal is to make [HTMX](https://htmx.org/) a first class citizen in HTMLForge - by adding types, functions and relevant syntax sugar to make it easy to work with HTMX in Julia/HTMLForge.
+HTMLForge is a fork of the Gumbo.jl project with the goal of extending it in ways that currently serve my own needs. For example, making HTMX a first class citizen in HTMLForge - by adding types, functions and relevant syntax sugar to make it easy to work with HTMX in Julia/HTMLForge.
 
 ### Getting started
+
 Getting started is very easy:
 
 ```julia
@@ -47,7 +42,7 @@ Pkg.add("HTMLForge")
 
 or activate `Pkg` mode in the REPL by typing `]`, and then:
 
-```
+```shell
 add HTMLForge
 ```
 
