@@ -1,5 +1,5 @@
 module HTMLForge
-using Gumbo_jll, Libdl
+using GumboBinaries_jll, Libdl
 
 include("CGumbo.jl")
 
