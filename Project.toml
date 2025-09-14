@@ -1,12 +1,15 @@
 name = "HTMLForge"
 uuid = "3f2c3872-777a-411d-b946-15b25a70da51"
 authors = ["Marius Fersigan <marius.fersigan@gmail.com> and contributors"]
-version = "0.3.0"
+version = "0.3.12"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 GumboBinaries_jll = "46267239-43ae-5cd9-90e2-2b25e1d265ea"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+URIs = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [sources]
 GumboBinaries_jll = {rev = "main", url = "https://github.com/algunion/GumboBinaries_jll.jl"}
@@ -14,6 +17,9 @@ GumboBinaries_jll = {rev = "main", url = "https://github.com/algunion/GumboBinar
 [compat]
 AbstractTrees = "0.2, 0.3, 0.4"
 GumboBinaries_jll = "0.13.2"
+Revise = "3.9.0"
+URIs = "1.6.1"
+Unicode = "1.11.0"
 julia = "1.8"
 
 [extras]

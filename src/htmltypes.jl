@@ -13,18 +13,34 @@ struct NullNode <: HTMLNode end
 mutable struct HTMLElement{T} <: HTMLNode
     children::Vector{HTMLNode}
     parent::HTMLNode
-    attributes::Dict{AbstractString,AbstractString}
+    attributes::Dict{AbstractString, AbstractString}
 end
 
-# convenience constructor for defining an empty element
-HTMLElement(T::Symbol) = HTMLElement{T}(HTMLNode[], NullNode(), Dict{AbstractString,AbstractString}())
+function HTMLElement(T::Symbol)
+    HTMLElement{T}(HTMLNode[], NullNode(), Dict{AbstractString, AbstractString}())
+end
 
+function HTMLElement(T::Symbol, children::Vector{<:HTMLNode}, parent::HTMLElement,
+        attributes::Dict{AbstractString, AbstractString})
+    HTMLElement{T}(children, parent, attributes)
+end
 
-HTMLElement(T::Symbol, children::Vector{<:HTMLNode}, attributes::Dict{AbstractString,AbstractString}) = HTMLElement{T}(children, NullNode(), attributes)
-HTMLElement(T::Symbol, child::HTMLNode) = HTMLElement{T}([child], NullNode(), Dict{AbstractString,AbstractString}())
-HTMLElement(T::Symbol, child::HTMLNode, attributes::Dict{AbstractString,AbstractString}) = HTMLElement{T}([child], NullNode(), attributes)
+function HTMLElement(T::Symbol, children::Vector{<:HTMLNode},
+        attributes::Dict{AbstractString, AbstractString})
+    HTMLElement{T}(children, NullNode(), attributes)
+end
+
+function HTMLElement(T::Symbol, child::HTMLNode)
+    HTMLElement{T}([child], NullNode(), Dict{AbstractString, AbstractString}())
+end
+
+function HTMLElement(
+        T::Symbol, child::HTMLNode, attributes::Dict{AbstractString, AbstractString})
+    HTMLElement{T}([child], NullNode(), attributes)
+end
+
 function HTMLElement(T::Symbol, children::Vector{<:HTMLNode}; kwargs...)
-    dictattrs = Dict{AbstractString,AbstractString}()
+    dictattrs = Dict{AbstractString, AbstractString}()
     for (k, v) in kwargs
         skey = string(k)
         dictattrs[replace(skey, "_" => "-")] = v
@@ -42,4 +58,6 @@ struct InvalidHTMLException <: Exception
     msg::AbstractString
 end
 
-
+struct InvalidAttributeException <: Exception
+    msg::AbstractString
+end

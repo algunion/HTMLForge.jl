@@ -1,8 +1,6 @@
 # basic test that parsing works correctly
 
-
-
-@test_throws HTMLForge.InvalidHTMLException parsehtml("", strict=true)
+@test_throws HTMLForge.InvalidHTMLException parsehtml("", strict = true)
 
 @testset "parsing with parents" begin
     page = open("$testdir/fixtures/example.html") do example
@@ -17,7 +15,7 @@ end
 
 @testset "parsing without parents" begin
     page = open("$testdir/fixtures/example.html") do example
-        parsehtml(read(example, String), include_parent=false)
+        parsehtml(read(example, String), include_parent = false)
     end
     @test page.doctype == "html"
     root = page.root
@@ -34,14 +32,12 @@ end
     @test snip.parent === NullNode()
 end
 
-
 # test that nonexistant tags are parsed as their actual name and not "unknown"
 
 let
     page = parsehtml("<weird></weird")
     @test tag(page.root[2][1]) == :weird
 end
-
 
 # test that non-standard tags, with attributes, are parsed correctly
 

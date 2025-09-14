@@ -46,5 +46,5 @@ end
 isp(node::HTMLNode) = isa(node, HTMLElement) && tag(node) == :p
 
 for itr in [PostOrderDFS, PreOrderDFS, StatelessBFS]
-    @assert mapreduce(isp,+,itr(ex.root)) == 1
+    @assert mapreduce(isp, +, itr(ex.root)) == 1
 end

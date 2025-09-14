@@ -13,38 +13,39 @@ import Base: ==, isequal, hash
 
 isequal(x::NullNode, y::NullNode) = true
 
-isequal(x::HTMLDocument, y::HTMLDocument) =
-    isequal(x.doctype,y.doctype) && isequal(x.root,y.root)
+function isequal(x::HTMLDocument, y::HTMLDocument)
+    isequal(x.doctype, y.doctype) && isequal(x.root, y.root)
+end
 
-isequal(x::HTMLText,y::HTMLText) = isequal(x.text, y.text)
+isequal(x::HTMLText, y::HTMLText) = isequal(x.text, y.text)
 
-isequal(x::HTMLElement, y::HTMLElement) =
-    isequal(x.attributes,y.attributes) && isequal(x.children,y.children)
+function isequal(x::HTMLElement, y::HTMLElement)
+    isequal(x.attributes, y.attributes) && isequal(x.children, y.children)
+end
 
-==(x::HTMLDocument, y::HTMLDocument) =
-    ==(x.doctype,y.doctype) && ==(x.root,y.root)
+==(x::HTMLDocument, y::HTMLDocument) = ==(x.doctype, y.doctype) && ==(x.root, y.root)
 
-==(x::HTMLText,y::HTMLText) = ==(x.text, y.text)
+==(x::HTMLText, y::HTMLText) = ==(x.text, y.text)
 
-==(x::HTMLElement, y::HTMLElement) =
-    ==(x.attributes,y.attributes) && ==(x.children,y.children)
-
+function ==(x::HTMLElement, y::HTMLElement)
+    ==(x.attributes, y.attributes) && ==(x.children, y.children)
+end
 
 # hashing
 
 function hash(doc::HTMLDocument)
-    hash(hash(HTMLDocument),hash(hash(doc.doctype), hash(doc.root)))
+    hash(hash(HTMLDocument), hash(hash(doc.doctype), hash(doc.root)))
 end
 
 function hash(elem::HTMLElement{T}) where {T}
     h = hash(HTMLElement)
-    h = hash(h,hash(T))
-    h = hash(h,hash(attrs(elem)))
+    h = hash(h, hash(T))
+    h = hash(h, hash(attrs(elem)))
     for child in children(elem)
-        h = hash(h,hash(child))
+        h = hash(h, hash(child))
     end
     return h
 end
 
-hash(t::HTMLText) = hash(hash(HTMLText),hash(t.text))
+hash(t::HTMLText) = hash(hash(HTMLText), hash(t.text))
 hash(n::NullNode) = hash(NullNode)

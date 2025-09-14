@@ -10,7 +10,6 @@ Get the tag of an element.
 """
 tag(::HTMLElement{T}) where {T} = T
 
-
 """
     attrs(elem::HTMLElement) :: Dict{String, String}
 
@@ -23,10 +22,11 @@ attrs(elem::HTMLElement) = elem.attributes
 
 Set the attributes of an element.
 """
-function setattr!(elem::HTMLElement, name::AbstractString, value::AbstractString)
+function setattr!(
+        elem::HTMLElement, name::Union{AbstractString, Symbol}, value::AbstractString)
+    @validate :attr string(name)
     elem.attributes[name] = value
 end
-
 
 """
     getattr(elem::HTMLElement, name::AbstractString) :: Union{AbstractString, Nothing}
@@ -40,18 +40,17 @@ getattr(elem::HTMLElement, name) = hasattr(elem, name) ? elem.attributes[name] :
 
 Get the value of an attribute of an element, or a default value if the attribute is not present.
 """
-getattr(elem::HTMLElement, name, default) = get(elem.attributes, name, default)
-
+getattr(elem::HTMLElement, name::Union{AbstractString, Symbol}, default) = get(
+    elem.attributes, string(name), default)
 
 """
     hasattr(elem::HTMLElement, name::AbstractString) :: Bool
 
 Check whether an element has an attribute.
 """
-hasattr(elem::HTMLElement, name) = name in keys(attrs(elem))
+hasattr(elem::HTMLElement, name::Union{AbstractString, Symbol}) = string(name) in keys(attrs(elem))
 
-
-AbstractTrees.children(elem::HTMLElement) = elem.children
+AbstractTrees.children(elem::HTMLElement) = Base.getfield(elem, :children)
 AbstractTrees.children(::HTMLText) = ()
 
 # TODO there is a naming conflict here if you want to use both packages
@@ -62,16 +61,12 @@ AbstractTrees.children(::HTMLText) = ()
 
 children = AbstractTrees.children
 
-# getting the length of an element gets the length of its children
-
 """
     length(elem::HTMLElement)
 
 Get the `length` of `elem`'s children.
 """
-Base.length(elem::HTMLElement) = length(elem.children)
-
-# getting the length of HTMLText gets the length of its text content.
+Base.length(elem::HTMLElement) = length(children(elem))
 
 """
     length:text::HTMLText)
@@ -79,8 +74,6 @@ Base.length(elem::HTMLElement) = length(elem.children)
 Get the `length` of text content.
 """
 Base.length(text::HTMLText) = length(text.text)
-
-
 
 # indexing into an element indexes into its children
 
@@ -92,15 +85,15 @@ Get the `i`th child of an element.
 Base.getindex(elem::HTMLElement, i) = getindex(elem.children, i)
 
 """
-    setindex!(elem::HTMLElement, i::Integer, val::HTMLElement)
+    setindex!(elem::HTMLElement, val::HTMLElement, i::Integer)
 
 Set the `i`th child of an element.
 """
-function Base.setindex!(elem::HTMLElement, i, val)
+function Base.setindex!(elem::HTMLElement, val::HTMLNode, i)
     if val.parent != elem
         val.parent = elem
     end
-    setindex!(elem.children, i, val)
+    setindex!(children(elem), val, i)
 end
 
 """
@@ -108,27 +101,27 @@ end
 
 Push a child onto an element.
 """
-function Base.push!(elem::HTMLElement, val)
+function Base.push!(elem::HTMLElement, val::HTMLNode)
     if val.parent != elem
         val.parent = elem
     end
     push!(elem.children, val)
 end
 
-
 """
     findfirst(f::Function, doc::HTMLDocument) :: Union{HTMLElement, Nothing}
 
 Find the first (PreOrderDFS) element in `doc` for which `f` is true.
 """
-findfirst(f::Function, doc::HTMLDocument)::Union{HTMLElement,Nothing} = findfirst(f, doc.root)
+findfirst(f::Function, doc::HTMLDocument)::Union{HTMLElement, Nothing} = findfirst(
+    f, doc.root)
 
 """
     findfirst(f::Function, elem::HTMLElement) :: Union{HTMLElement, Nothing}
 
 Find the first (PreOrderDFS) element in `elem` for which `f` is true.
 """
-function findfirst(f::Function, elem::HTMLElement)::Union{HTMLElement,Nothing}
+function findfirst(f::Function, elem::HTMLElement)::Union{HTMLElement, Nothing}
     for el in AbstractTrees.PreOrderDFS(elem)
         el isa HTMLElement && f(el) && return el
     end
@@ -142,24 +135,24 @@ end
 
 Get the element with the given `id` from `doc`.
 """
-getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(doc.root, id)::Union{HTMLElement,Nothing}
-
+getbyid(doc::HTMLDocument, id::AbstractString) = getbyid(
+    doc.root, id)::Union{HTMLElement, Nothing}
 
 """
     getbyid(elem::HTMLElement, id::AbstractString) :: Union{HTMLElement, Nothing}
 
 Get the element with the given `id` from `elem`.
 """
-getbyid(elem::HTMLElement, id::AbstractString) = findfirst(x -> hasattr(x, "id") && getattr(x, "id") == id, elem)::Union{HTMLElement,Nothing}
-
+getbyid(elem::HTMLElement, id::AbstractString) = findfirst(
+    x -> hasattr(x, "id") && getattr(x, "id") == id, elem)::Union{HTMLElement, Nothing}
 
 """
     applyif!(condition::Function, f!::Function, doc::HTMLDocument)
     
 Apply `f!` to all elements (nested included) in `doc` for which `condition` is true.
 """
-applyif!(condition::Function, f!::Function, doc::HTMLDocument) = applyif!(condition, f!, doc.root)
-
+applyif!(condition::Function, f!::Function, doc::HTMLDocument) = applyif!(
+    condition, f!, doc.root)
 
 """
     applyif!(condition::Function, f!::Function, elem::HTMLElement)
@@ -172,16 +165,14 @@ function applyif!(condition::Function, f!::Function, elem::HTMLElement)
     end
 end
 
-
 """
     hasclass(elem::HTMLElement, cls::AbstractString)
 
 Returns `true` if `elem` has the class `cls`.
 """
 function hasclass(elem::HTMLElement, cls::AbstractString)::Bool
-    hasattr(elem, "class") && cls in split(getattr(elem, "class", ""))
+    hasattr(elem, "class") && cls ∈ split(getattr(elem, "class", ""))
 end
-
 
 """
     addclass!(elem::HTMLElement, cls::AbstractString)
@@ -203,29 +194,30 @@ Removes the class `cls` from `elem`.
 """
 function removeclass!(elem::HTMLElement, cls::AbstractString)
     if hasclass(elem, cls)
-        setattr!(elem, "class", join(filter(x -> x != cls, split(getattr(elem, "class", ""))), " "))
+        setattr!(elem, "class",
+            join(filter(x -> x != cls, split(getattr(elem, "class", ""))), " "))
     end
 end
 
 function replaceclass!(elem::HTMLElement, old::AbstractString, new::AbstractString)
     if hasclass(elem, old)
-        setattr!(elem, "class", join(filter(x -> x != old, split(getattr(elem, "class", ""))), " ") * " " * new)
+        setattr!(elem,
+            "class",
+            join(filter(x -> x != old, split(getattr(elem, "class", ""))), " ") * " " * new)
     end
 end
-
 
 function _firsttag(el::HTMLElement, t)
     findfirst(x -> tag(x) === t, el)
 end
 
 # body
-body(el::HTMLElement)::Union{HTMLElement,Nothing} = _firsttag(el, :body)
-body(doc::HTMLDocument)::Union{HTMLElement,Nothing} = body(doc.root)
+body(el::HTMLElement)::Union{HTMLElement, Nothing} = _firsttag(el, :body)
+body(doc::HTMLDocument)::Union{HTMLElement, Nothing} = body(doc.root)
 
 #head
-head(el::HTMLElement)::Union{HTMLElement,Nothing} = _firsttag(el, :head)
-head(doc::HTMLDocument)::Union{HTMLElement,Nothing} = head(doc.root)
-
+head(el::HTMLElement)::Union{HTMLElement, Nothing} = _firsttag(el, :head)
+head(doc::HTMLDocument)::Union{HTMLElement, Nothing} = head(doc.root)
 
 # text
 
@@ -245,7 +237,7 @@ function text(el::HTMLElement)
     io = IOBuffer()
     for c in AbstractTrees.PreOrderDFS(el)
         if c isa HTMLText
-            print(io, c.text, ' ')
+            print(io, text(c), ' ')
         end
     end
 

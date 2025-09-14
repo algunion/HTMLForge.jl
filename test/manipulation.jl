@@ -5,10 +5,12 @@
     @test doc.root |> tag == :HTML
     @test length(doc.root[2]) == 5
     @test length(doc.root[2][1][1]) == 26
-    @test HTMLForge.findfirst(x -> hasattr(x, "id") && getattr(x, "id") == "myid", doc.root) |> tag == :p
+    @test HTMLForge.findfirst(
+        x -> hasattr(x, "id") && getattr(x, "id") == "myid", doc.root) |> tag == :p
     @test getbyid(doc.root, "myid") |> tag == :p
     applyif!(x -> x |> tag == :div, x -> setattr!(x, "class", "wide"), doc.root)
-    @test HTMLForge.findfirst(x -> hasattr(x, "class") && getattr(x, "class") == "wide", doc.root) |> tag == :div
+    @test HTMLForge.findfirst(
+        x -> hasattr(x, "class") && getattr(x, "class") == "wide", doc.root) |> tag == :div
     println(doc)
     @test hasclass(getbyid(doc.root, "adiv"), "wide")
     @test !hasclass(doc.root, "narrow")

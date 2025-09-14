@@ -22,10 +22,10 @@ let
     push!(y, HTMLElement(:p))
     @test x == y
     @test hash(x) == hash(y)
-    setattr!(x,"class","test")
+    setattr!(x, "class", "test")
     @test x != y
     @test hash(x) != hash(y)
-    setattr!(y,"class","test")
+    setattr!(y, "class", "test")
     @test x == y
     @test hash(x) == hash(y)
 end
