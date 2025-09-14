@@ -1,6 +1,6 @@
 using URIs
 
-const HXPREFIX = "hx-"
+const HXPREFIX = "data-hx-"
 const HXREQUESTS = [:get, :post, :put, :patch, :delete]
 const HTMX_ATTRS = [
     :trigger, :target, :post, :get, :put, :patch, :delete, :swap, :indicator,

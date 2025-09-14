@@ -39,6 +39,18 @@ function validate(::Val{:attr}, value::AbstractString)
 end
 
 """
+    validate(::Val{:attr}, value::AbstractString)
+
+Validate HTML attribute names.
+"""
+function validate(::Val{:attr}, values::Vector{<:AbstractString})
+    for v in values
+        attributevalidation(v)
+    end
+    return true
+end
+
+"""
     @validate type value
 
 Validate HTML elements based on their type using compile-time dispatch.
