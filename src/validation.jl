@@ -30,12 +30,38 @@ function attributevalidation(attr::AbstractString)
 end
 
 """
+    classvaluevalidation(class::AbstractString)
+
+CSS class values validation.
+"""
+function classvaluevalidation(classvalue::AbstractString)
+    stripped_cls = strip(classvalue)
+    isempty(stripped_cls) &&
+        throw(ArgumentError("Class name cannot be empty or whitespace."))
+    for c in stripped_cls
+        if isspace(c)
+            throw(InvalidAttributeException("Class names cannot contain whitespace: '$classvalue'"))
+        end
+    end
+    return true
+end
+
+"""
     validate(::Val{:attr}, value::AbstractString)
 
 Validate HTML attribute names.
 """
 function validate(::Val{:attr}, value::AbstractString)
     return attributevalidation(value)
+end
+
+"""
+    validate(::Val{:class}, value::AbstractString)
+
+Validate CSS class names.
+"""
+function validate(::Val{:class}, value::AbstractString)
+    return classvaluevalidation(value)
 end
 
 """
@@ -51,17 +77,32 @@ function validate(::Val{:attr}, values::Vector{<:AbstractString})
 end
 
 """
+    validate(::Val{:class}, values::Vector{<:AbstractString})
+
+Validate CSS class names.
+"""
+function validate(::Val{:class}, values::Vector{<:AbstractString})
+    for v in values
+        classvaluevalidation(v)
+    end
+    return true
+end
+
+"""
     @validate type value
 
 Validate HTML elements based on their type using compile-time dispatch.
 
 # Arguments
-- `type`: Symbol indicating what to validate (`:attr` for attribute names)
-- `value`: The string value to validate
+- `type`: Symbol indicating what to validate (`:attr` for attribute names, `:class` for class names)
+- `value`: The string(s) value to validate
 
 # Examples
 ```julia
 @validate :attr "class"  # Validates an attribute name
+@validate :attr ["id", "data-value"]  # Validates multiple attribute names
+@validate :class "my-class"  # Validates a class name
+@validate :class ["class1", "class2"]  # Validates multiple class names
 ```
 
 # Returns

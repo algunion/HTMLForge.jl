@@ -24,24 +24,21 @@ Set the attributes of an element.
 """
 function setattr!(
         elem::HTMLElement, name::Union{AbstractString, Symbol}, value::AbstractString)
-    @validate :attr string(name)
-    elem.attributes[name] = value
+    attr_str = string(name)
+    @validate :attr attr_str
+    elem.attributes[attr_str] = value
 end
 
 """
-    getattr(elem::HTMLElement, name::AbstractString) :: Union{AbstractString, Nothing}
+    getattr(elem::HTMLElement, name::AbstractString, default=nothing) :: Union{String, Nothing}
 
-Get the value of an attribute of an element.
+Get the value of an attribute of an element or `default` if not present.
 """
-getattr(elem::HTMLElement, name) = hasattr(elem, name) ? elem.attributes[name] : nothing
-
-"""
-    getattr(elem::HTMLElement, name::AbstractString, default::AbstractString) :: AbstractString
-
-Get the value of an attribute of an element, or a default value if the attribute is not present.
-"""
-getattr(elem::HTMLElement, name::Union{AbstractString, Symbol}, default) = get(
-    elem.attributes, string(name), default)
+function getattr end
+function getattr(elem::HTMLElement, name::Union{AbstractString, Symbol}, default = nothing)
+    get(
+        elem.attributes, string(name), default)
+end
 
 """
     hasattr(elem::HTMLElement, name::AbstractString) :: Bool
@@ -76,13 +73,22 @@ Get the `length` of text content.
 Base.length(text::HTMLText) = length(text.text)
 
 # indexing into an element indexes into its children
+# key based indexing into attributes
 
 """
-    getindex(elem::HTMLElement, i::Integer) :: Union{HTMLElement, Nothing}
+    getindex(elem::HTMLElement, i::Int)
 
 Get the `i`th child of an element.
 """
-Base.getindex(elem::HTMLElement, i) = getindex(elem.children, i)
+Base.getindex(elem::HTMLElement, i::Int) = getindex(elem.children, i)
+
+"""
+    getindex(elem::HTMLElement, key::Union{AbstractString, Symbol})
+
+Get the attribute with the given `key` from an element.
+"""
+Base.getindex(elem::HTMLElement, key::AbstractString) = getindex(elem.attributes, key)
+Base.getindex(elem::HTMLElement, key::Symbol) = getindex(elem.attributes, string(key))
 
 """
     setindex!(elem::HTMLElement, val::HTMLElement, i::Integer)
@@ -95,6 +101,20 @@ function Base.setindex!(elem::HTMLElement, val::HTMLNode, i)
     end
     setindex!(children(elem), val, i)
 end
+
+"""
+    setindex!(elem::HTMLElement, val::AbstractString, key::Union{AbstractString, Symbol})
+
+Set the attribute with the given `key` on an element.
+"""
+function Base.setindex!(
+        elem::HTMLElement, val::AbstractString, key::Union{AbstractString, Symbol})
+    @validate :attr string(key)
+    elem.attributes[string(key)] = val
+end
+
+Base.firstindex(elem::HTMLElement) = firstindex(children(elem))
+Base.lastindex(elem::HTMLElement) = lastindex(children(elem))
 
 """
     push!(elem::HTMLElement, val::HTMLElement)
@@ -171,7 +191,10 @@ end
 Returns `true` if `elem` has the class `cls`.
 """
 function hasclass(elem::HTMLElement, cls::AbstractString)::Bool
-    hasattr(elem, "class") && cls ∈ split(getattr(elem, "class", ""))
+    stripped_cls = strip(cls)
+    isempty(stripped_cls) &&
+        throw(ArgumentError("Class name cannot be empty or whitespace."))
+    hasattr(elem, "class") && stripped_cls ∈ split(getattr(elem, "class"))
 end
 
 """
@@ -180,10 +203,33 @@ end
 Adds the class `cls` to `elem`.
 """
 function addclass!(elem::HTMLElement, cls::AbstractString)
-    if hasattr(elem, "class") && !hasclass(elem, cls)
-        setattr!(elem, "class", getattr(elem, "class") * " " * cls)
+    @validate :class cls
+    stripped_cls = strip(cls)
+    isempty(stripped_cls) &&
+        throw(ArgumentError("Class name cannot be empty or whitespace."))
+    if hasattr(elem, "class") && !hasclass(elem, stripped_cls)
+        setattr!(elem, "class", getattr(elem, "class") * " " * stripped_cls)
     else
-        setattr!(elem, "class", cls)
+        setattr!(elem, "class", stripped_cls)
+    end
+end
+
+function replaceclass!(
+        elem::HTMLElement, oldclass::AbstractString, newclass::Union{
+            AbstractString, Nothing})
+    if isnothing(newclass)
+        replacement = " "
+    else
+        @validate :class newclass
+        replacement = " $newclass "
+    end
+
+    if hasclass(elem, oldclass)
+        full_class = elem[:class]
+        pattern = "\\s*\\b$(oldclass)\\b\\s*"
+        re = Regex(pattern)
+        with_class_replaced = replace(full_class, re => replacement) |> strip
+        elem[:class] = with_class_replaced
     end
 end
 
@@ -192,20 +238,7 @@ end
 
 Removes the class `cls` from `elem`.
 """
-function removeclass!(elem::HTMLElement, cls::AbstractString)
-    if hasclass(elem, cls)
-        setattr!(elem, "class",
-            join(filter(x -> x != cls, split(getattr(elem, "class", ""))), " "))
-    end
-end
-
-function replaceclass!(elem::HTMLElement, old::AbstractString, new::AbstractString)
-    if hasclass(elem, old)
-        setattr!(elem,
-            "class",
-            join(filter(x -> x != old, split(getattr(elem, "class", ""))), " ") * " " * new)
-    end
-end
+removeclass!(elem::HTMLElement, cls::AbstractString) = replaceclass!(elem, cls, nothing)
 
 function _firsttag(el::HTMLElement, t)
     findfirst(x -> tag(x) === t, el)

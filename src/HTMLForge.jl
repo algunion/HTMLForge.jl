@@ -35,7 +35,8 @@ export HTMLElement,
        hxput,
        hxpatch,
        hxdelete,
-       hxrequest
+       hxrequest,
+       @validate
 
 include("htmltypes.jl")
 include("validation.jl")
