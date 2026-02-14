@@ -3,7 +3,10 @@
 !!! warning "Experimental"
     This module uses advanced Julia metaprogramming (macros, `@eval` code generation, `Base.getproperty` overloading) to compress the full 625-line HTMX API into **under 100 lines of code**. The interfaces are experimental and may evolve.
 
-The Experimental module provides **three interfaces** for working with HTMX attributes. All three produce identical results — choose the style that fits your workflow.
+The Experimental module provides **three interfaces** for working with HTMX attributes. All three can produce identical results — choose the style that fits your workflow.
+
+!!! note
+    The `@hx` macro sets raw string values for all attributes. Trigger modifiers like `once`, `delay`, etc. must be included directly in the string (e.g., `trigger="click once"`) rather than via keyword arguments.
 
 ## Setup
 
@@ -166,8 +169,8 @@ hxswap!(el, "outerHTML")
 hxtrigger!(el, "click"; once=true)
 hxconfirm!(el, "Sure?")
 
-# @hx macro
-el = @hx :button post="/submit" target="#result" swap="outerHTML" trigger="click" confirm="Sure?"
+# @hx macro — trigger modifiers are included in the raw string
+el = @hx :button post="/submit" target="#result" swap="outerHTML" trigger="click once" confirm="Sure?"
 
 # Pipe DSL
 el = HTMLElement(:button) |>
@@ -177,6 +180,9 @@ el = HTMLElement(:button) |>
     hx.trigger("click"; once=true) |>
     hx.confirm("Sure?")
 ```
+
+!!! tip
+    The Classic and Pipe interfaces build trigger/swap modifiers via keyword arguments. The `@hx` macro sets all values as raw strings — include the full `hx-trigger` or `hx-swap` value directly (e.g., `trigger="click once delay:500ms"`).
 
 ## Supported Attributes
 
