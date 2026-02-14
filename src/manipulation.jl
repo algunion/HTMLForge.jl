@@ -207,30 +207,36 @@ function addclass!(elem::HTMLElement, cls::AbstractString)
     stripped_cls = strip(cls)
     isempty(stripped_cls) &&
         throw(ArgumentError("Class name cannot be empty or whitespace."))
-    if hasattr(elem, "class") && !hasclass(elem, stripped_cls)
-        setattr!(elem, "class", getattr(elem, "class") * " " * stripped_cls)
-    else
+    if !hasattr(elem, "class")
         setattr!(elem, "class", stripped_cls)
+    elseif !hasclass(elem, stripped_cls)
+        setattr!(elem, "class", getattr(elem, "class") * " " * stripped_cls)
     end
+    return elem
 end
 
 function replaceclass!(
         elem::HTMLElement, oldclass::AbstractString, newclass::Union{
             AbstractString, Nothing})
-    if isnothing(newclass)
-        replacement = " "
-    else
+    if !isnothing(newclass)
         @validate :class newclass
-        replacement = " $newclass "
     end
 
     if hasclass(elem, oldclass)
-        full_class = elem[:class]
-        pattern = "\\s*\\b$(oldclass)\\b\\s*"
-        re = Regex(pattern)
-        with_class_replaced = replace(full_class, re => replacement) |> strip
-        elem[:class] = with_class_replaced
+        classes = split(getattr(elem, "class"))
+        idx = Base.findfirst(==(oldclass), classes)
+        if !isnothing(newclass)
+            classes[idx] = strip(newclass)
+        else
+            deleteat!(classes, idx)
+        end
+        if isempty(classes)
+            delete!(elem.attributes, "class")
+        else
+            elem[:class] = join(classes, " ")
+        end
     end
+    return elem
 end
 
 """
@@ -276,3 +282,26 @@ function text(el::HTMLElement)
 
     return strip(String(take!(io)))
 end
+
+# Traversal convenience aliases
+
+"""
+    postorder(node)
+
+Return a post-order depth-first iterator over the tree rooted at `node`.
+"""
+postorder(node) = AbstractTrees.PostOrderDFS(node)
+
+"""
+    preorder(node)
+
+Return a pre-order depth-first iterator over the tree rooted at `node`.
+"""
+preorder(node) = AbstractTrees.PreOrderDFS(node)
+
+"""
+    breadthfirst(node)
+
+Return a breadth-first iterator over the tree rooted at `node`.
+"""
+breadthfirst(node) = AbstractTrees.StatelessBFS(node)

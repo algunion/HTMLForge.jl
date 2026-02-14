@@ -36,10 +36,14 @@ function parsehtml_snippet(
     doc = parsehtml(input, strict = false, preserve_whitespace = preserve_whitespace,
         preserve_template = preserve_template, include_parent = false)
     root = doc.root
-    if length(root[2].children) > 1
-        return HTMLElement{:div}(root[2].children, NullNode(), Dict())
+    body_children = root[2].children
+    if isempty(body_children)
+        throw(ArgumentError("HTML snippet produced no body content"))
+    elseif length(body_children) > 1
+        return HTMLElement{:div}(body_children, NullNode(),
+            Dict{AbstractString, AbstractString}())
     else
-        return root[2].children[1]
+        return body_children[1]
     end
 end
 

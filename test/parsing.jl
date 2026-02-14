@@ -32,6 +32,18 @@ end
     @test snip.parent === NullNode()
 end
 
+@testset "snippet with multiple top-level tags" begin
+    snip = parsehtml_snippet("<p>one</p><p>two</p>")
+    @test tag(snip) == :div  # wrapped in div
+    @test length(children(snip)) == 2
+    @test tag(snip[1]) == :p
+    @test tag(snip[2]) == :p
+end
+
+@testset "snippet empty input" begin
+    @test_throws ArgumentError parsehtml_snippet("")
+end
+
 # test that nonexistant tags are parsed as their actual name and not "unknown"
 
 let
@@ -45,4 +57,15 @@ let
     page = HTMLForge.parsehtml("<my-element cool></my-element>")
     @test tag(page.root[2][1]) == Symbol("my-element")
     @test HTMLForge.attrs(page.root[2][1]) == Dict("cool" => "")
+end
+
+@testset "parsehtml non-strict mode" begin
+    # Invalid HTML should not throw in non-strict mode (default)
+    doc = parsehtml("<div><p>unclosed")
+    @test doc isa HTMLForge.HTMLDocument
+end
+
+@testset "parsehtml preserve_whitespace" begin
+    doc = parsehtml("<pre>  spaces  </pre>", preserve_whitespace = true)
+    @test doc isa HTMLForge.HTMLDocument
 end

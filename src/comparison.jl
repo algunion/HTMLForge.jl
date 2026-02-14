@@ -19,33 +19,33 @@ end
 
 isequal(x::HTMLText, y::HTMLText) = isequal(x.text, y.text)
 
-function isequal(x::HTMLElement, y::HTMLElement)
-    isequal(x.attributes, y.attributes) && isequal(x.children, y.children)
+function isequal(x::HTMLElement{T1}, y::HTMLElement{T2}) where {T1, T2}
+    T1 === T2 && isequal(x.attributes, y.attributes) && isequal(x.children, y.children)
 end
 
 ==(x::HTMLDocument, y::HTMLDocument) = ==(x.doctype, y.doctype) && ==(x.root, y.root)
 
 ==(x::HTMLText, y::HTMLText) = ==(x.text, y.text)
 
-function ==(x::HTMLElement, y::HTMLElement)
-    ==(x.attributes, y.attributes) && ==(x.children, y.children)
+function ==(x::HTMLElement{T1}, y::HTMLElement{T2}) where {T1, T2}
+    T1 === T2 && ==(x.attributes, y.attributes) && ==(x.children, y.children)
 end
 
 # hashing
 
-function hash(doc::HTMLDocument)
-    hash(hash(HTMLDocument), hash(hash(doc.doctype), hash(doc.root)))
+function hash(doc::HTMLDocument, h::UInt)
+    hash(doc.root, hash(doc.doctype, hash(HTMLDocument, h)))
 end
 
-function hash(elem::HTMLElement{T}) where {T}
-    h = hash(HTMLElement)
-    h = hash(h, hash(T))
-    h = hash(h, hash(attrs(elem)))
+function hash(elem::HTMLElement{T}, h::UInt) where {T}
+    h = hash(HTMLElement, h)
+    h = hash(T, h)
+    h = hash(attrs(elem), h)
     for child in children(elem)
-        h = hash(h, hash(child))
+        h = hash(child, h)
     end
     return h
 end
 
-hash(t::HTMLText) = hash(hash(HTMLText), hash(t.text))
-hash(n::NullNode) = hash(NullNode)
+hash(t::HTMLText, h::UInt) = hash(t.text, hash(HTMLText, h))
+hash(n::NullNode, h::UInt) = hash(NullNode, h)
