@@ -1,5 +1,7 @@
 # HTMLForge.jl
 
+[![codecov](https://codecov.io/gh/algunion/HTMLForge.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/algunion/HTMLForge.jl)
+
 In the current state, HTMLForge.jl is a Julia wrapper around
 [Gumbo library](https://codeberg.org/gumbo-parser/gumbo-parser) for
 parsing HTML.
