@@ -1,0 +1,304 @@
+        - 
+        - let
+        -     # roundtrip test
+        -     # TODO this could be done with Quickcheck if we had a way of
+        -     # generating "interesting" HTML documents
+        -     doc = open("$testdir/fixtures/example.html") do example
+        2         read(example, String) |> parsehtml
+        -     end
+        -     io = IOBuffer()
+        -     print(io, doc)
+        -     seek(io, 0)
+        -     newdoc = read(io, String) |> parsehtml
+        -     @test newdoc == doc
+        - end
+        - 
+        - tests = [
+        -     "30",  # regression test for issue #30
+        -     "multitext",  # regression test for multiple HTMLText in one HTMLElement
+        -     "varied",  # relatively complex example
+        -     "whitespace",  # whitespace sensitive
+        -     "whitespace2",  # whitespace sensitive
+        -     "template"  # preserve template
+        - ]
+        - @testset for test in tests
+        -     let
+        -         doc = open("$testdir/fixtures/$(test)_input.html") do example
+        6             parsehtml(read(example, String), preserve_whitespace = (test == "whitespace"),
+        -                 preserve_template = (test == "template"))
+        -         end
+        -         io = IOBuffer()
+        -         print(io, doc.root, pretty = (test != "whitespace"))
+        -         seek(io, 0)
+        -         ground_truth = read(open("$testdir/fixtures/$(test)_output.html"), String)
+        -         # Eliminate possible line ending issues
+        -         ground_truth = replace(ground_truth, "\r\n" => "\n")
+        -         @test read(io, String) == ground_truth
+        -     end
+        - end
+        - 
+        - @testset "xml entities" begin
+        -     io = IOBuffer()
+        - 
+        -     orig = """<p class="asd&gt;&amp;-2&quot;">&lt;faketag&gt;</p>"""
+        -     print(io, parsehtml(orig))
+        -     @test occursin(orig, String(take!(io)))
+        - end
+        - 
+        - @testset "prettyprint" begin
+        -     el = HTMLElement(:div)
+        -     push!(el, HTMLElement(:p))
+        - 
+        -     # prettyprint to IO
+        -     io = IOBuffer()
+        -     prettyprint(io, el)
+        -     output = String(take!(io))
+        -     @test occursin("<div>", output)
+        -     @test occursin("<p>", output)
+        - 
+        -     # prettyprint HTMLDocument
+        -     doc = HTMLDocument("html", HTMLElement(:html))
+        -     io2 = IOBuffer()
+        -     prettyprint(io2, doc)
+        -     output2 = String(take!(io2))
+        -     @test occursin("<!DOCTYPE html>", output2)
+        - end
+        - 
+        - @testset "show HTMLElement" begin
+        -     el = HTMLElement(:div)
+        -     push!(el, HTMLText("hello"))
+        - 
+        -     # Default show
+        -     io = IOBuffer()
+        -     show(io, el)
+        -     output = String(take!(io))
+        -     @test occursin("HTMLElement", output)
+        - 
+        -     # Compact show
+        -     io2 = IOBuffer()
+        -     show(IOContext(io2, :compact => true), el)
+        -     output2 = String(take!(io2))
+        -     @test occursin("HTMLElement", output2)
+        - 
+        -     # Limited show
+        -     io3 = IOBuffer()
+        -     show(IOContext(io3, :limit => true), el)
+        -     output3 = String(take!(io3))
+        -     @test occursin("HTMLElement", output3)
+        - end
+        - 
+        - @testset "show HTMLText" begin
+        -     t = HTMLText("hello world")
+        -     io = IOBuffer()
+        -     show(io, t)
+        -     output = String(take!(io))
+        -     @test occursin("HTML Text:", output)
+        -     @test occursin("hello world", output)
+        - end
+        - 
+        - @testset "show HTMLDocument" begin
+        -     doc = HTMLDocument("html", HTMLElement(:html))
+        -     io = IOBuffer()
+        -     show(io, doc)
+        -     output = String(take!(io))
+        -     @test occursin("HTML Document:", output)
+        -     @test occursin("<!DOCTYPE html>", output)
+        - end
+        - 
+        - @testset "print HTMLText" begin
+        -     t = HTMLText("hello <world>")
+        - 
+        -     # With substitution (default)
+        -     io = IOBuffer()
+        -     print(io, t)
+        -     @test String(take!(io)) == "hello &lt;world&gt;"
+        - 
+        -     # Without substitution
+        -     io2 = IOBuffer()
+        -     print(io2, t; substitution = false)
+        -     @test String(take!(io2)) == "hello <world>"
+        - 
+        -     # Pretty print
+        -     io3 = IOBuffer()
+        -     print(io3, t; pretty = true)
+        -     output = String(take!(io3))
+        -     @test occursin("hello", output)
+        - end
+        - 
+        - @testset "empty tags" begin
+        -     el = HTMLElement(:br)
+        -     io = IOBuffer()
+        -     print(io, el)
+        -     @test String(take!(io)) == "<br/>"
+        - 
+        -     el2 = HTMLElement(:img)
+        -     setattr!(el2, "src", "test.png")
+        -     io2 = IOBuffer()
+        -     print(io2, el2)
+        -     @test occursin("<img", String(take!(io2)))
+        -     @test !occursin("</img>", String(take!(io2)))  # empty tags have no closing tag
+        - end
+        - 
+        - @testset "entity substitution in attributes" begin
+        -     el = HTMLElement(:div)
+        -     setattr!(el, "data-value", "a\"b'c<d>e&f")
+        -     io = IOBuffer()
+        -     print(io, el)
+        -     output = String(take!(io))
+        -     @test occursin("&quot;", output)
+        -     @test occursin("&#39;", output)
+        -     @test occursin("&lt;", output)
+        -     @test occursin("&gt;", output)
+        -     @test occursin("&amp;", output)
+        - end
+        - 
+        - @testset "no entity substitution in script/style" begin
+        -     script = HTMLElement(:script)
+        -     push!(script, HTMLText("var x = 1 < 2 && 3 > 1;"))
+        -     io = IOBuffer()
+        -     print(io, script)
+        -     output = String(take!(io))
+        -     @test occursin("1 < 2 && 3 > 1", output)
+        -     @test !occursin("&lt;", output)
+        - end
+        - 
+        - @testset "substitute_text_entities direct" begin
+        -     import HTMLForge: substitute_text_entities
+        -     @test substitute_text_entities("a & b") == "a &amp; b"
+        -     @test substitute_text_entities("<tag>") == "&lt;tag&gt;"
+        -     @test substitute_text_entities("no special") == "no special"
+        -     @test substitute_text_entities("") == ""
+        -     @test substitute_text_entities("&<>") == "&amp;&lt;&gt;"
+        - end
+        - 
+        - @testset "substitute_attribute_entities direct" begin
+        -     import HTMLForge: substitute_attribute_entities
+        -     @test substitute_attribute_entities("a\"b") == "a&quot;b"
+        -     @test substitute_attribute_entities("a'b") == "a&#39;b"
+        -     @test substitute_attribute_entities("a&b<c>d\"e'f") == "a&amp;b&lt;c&gt;d&quot;e&#39;f"
+        -     @test substitute_attribute_entities("") == ""
+        - end
+        - 
+        - @testset "prettyprint to stdout" begin
+        -     # prettyprint(elem::HTMLElement) — routes to print(stdout, elem, pretty=true)
+        -     el = HTMLElement(:div)
+        -     push!(el, HTMLElement(:p))
+        -     io = IOBuffer()
+        -     prettyprint(io, el)
+        -     output = String(take!(io))
+        -     @test occursin("<div>", output)
+        -     @test occursin("<p>", output)
+        - 
+        -     # prettyprint(doc::HTMLDocument) — routes to print(stdout, doc, pretty=true)
+        -     doc = HTMLDocument("html", HTMLElement(:html))
+        -     io2 = IOBuffer()
+        -     prettyprint(io2, doc)
+        -     output2 = String(take!(io2))
+        -     @test occursin("<!DOCTYPE html>", output2)
+        - 
+        -     # Verify the stdout variants don't error (they just call the IO variants with stdout)
+        -     el2 = HTMLElement(:span)
+        -     @test prettyprint(devnull, el2) === nothing
+        - 
+        -     doc2 = HTMLDocument("html", HTMLElement(:html))
+        -     @test prettyprint(devnull, doc2) === nothing
+        - end
+        - 
+        1 @testset "show HTMLElement with limit truncation" begin
+        -     # Create element with >20 lines of pretty-printed output
+        2     root = HTMLElement(:div)
+        1     for i in 1:25
+       25         child = HTMLElement(:p)
+       25         push!(child, HTMLText("Line $i"))
+       25         push!(root, child)
+       25     end
+        1     io = IOBuffer()
+        1     show(IOContext(io, :limit => true), root)
+        1     output = String(take!(io))
+        1     @test occursin("...", output)
+        - end
+        - 
+        - @testset "print HTMLText pretty with multiline" begin
+        -     t = HTMLText("line1\nline2\n\nline3")
+        -     io = IOBuffer()
+        -     print(io, t; pretty = true, depth = 1)
+        -     output = String(take!(io))
+        -     @test occursin("line1", output)
+        -     @test occursin("line2", output)
+        -     @test occursin("line3", output)
+        - end
+        - 
+        - @testset "print HTMLElement pretty with no children" begin
+        -     el = HTMLElement(:div)
+        -     setattr!(el, "id", "empty")
+        -     io = IOBuffer()
+        -     print(io, el; pretty = true)
+        -     output = String(take!(io))
+        -     @test occursin("<div", output)
+        -     @test occursin("</div>", output)
+        - end
+        - 
+        - @testset "print HTMLDocument direct" begin
+        -     doc = HTMLDocument("html", HTMLElement(:html))
+        -     io = IOBuffer()
+        -     print(io, doc)
+        -     output = String(take!(io))
+        -     @test startswith(output, "<!DOCTYPE html>")
+        -     @test occursin("<html>", output)
+        -     @test occursin("</html>", output)
+        - end
+        - 
+        - @testset "print HTMLDocument pretty" begin
+        -     doc = HTMLDocument("html", HTMLElement(:html))
+        -     io = IOBuffer()
+        -     print(io, doc; pretty = true)
+        -     output = String(take!(io))
+        -     @test startswith(output, "<!DOCTYPE html>")
+        - end
+        - 
+        - @testset "print style element no entity substitution" begin
+        -     style = HTMLElement(:style)
+        -     push!(style, HTMLText("body { content: '1 < 2'; }"))
+        -     io = IOBuffer()
+        -     print(io, style)
+        -     output = String(take!(io))
+        -     @test occursin("1 < 2", output)
+        -     @test !occursin("&lt;", output)
+        - end
+        - 
+        - @testset "print empty element with attributes" begin
+        -     el = HTMLElement(:input)
+        -     setattr!(el, "type", "text")
+        -     setattr!(el, "name", "q")
+        -     io = IOBuffer()
+        -     print(io, el)
+        -     output = String(take!(io))
+        -     @test occursin("<input", output)
+        -     @test occursin("/>", output)
+        -     @test !occursin("</input>", output)
+        -     @test occursin("type=\"text\"", output)
+        - end
+        - 
+        - @testset "print whitespace-relevant tag pretty" begin
+        -     pre = HTMLElement(:pre)
+        -     push!(pre, HTMLText("  preserved  "))
+        -     io = IOBuffer()
+        -     print(io, pre; pretty = true)
+        -     output = String(take!(io))
+        -     # Pretty should not apply to whitespace-relevant children
+        -     @test occursin("  preserved  ", output)
+        - end
+        - 
+        - @testset "print nested elements pretty" begin
+        -     outer = HTMLElement(:div)
+        -     inner = HTMLElement(:span)
+        -     push!(inner, HTMLText("text"))
+        -     push!(outer, inner)
+        -     io = IOBuffer()
+        -     print(io, outer; pretty = true)
+        -     output = String(take!(io))
+        -     @test occursin("<div>", output)
+        -     @test occursin("<span>", output)
+        -     @test occursin("</span>", output)
+        -     @test occursin("</div>", output)
+        - end

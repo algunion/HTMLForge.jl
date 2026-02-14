@@ -118,3 +118,33 @@ end
     @test (@validate :class ["cls1", "cls2"]) == true
     @test_throws InvalidAttributeException @validate :class ["a b", "cls2"]
 end
+
+@testset "attributevalidation direct" begin
+    import HTMLForge: attributevalidation
+
+    # NULL character
+    @test_throws InvalidAttributeException attributevalidation("foo\0bar")
+
+    # Control characters (e.g., \x01, \x7f)
+    @test_throws InvalidAttributeException attributevalidation("foo\x01bar")
+    @test_throws InvalidAttributeException attributevalidation("\x7f")
+
+    # Valid attribute returns true
+    @test attributevalidation("data-value") == true
+    @test attributevalidation("x") == true
+end
+
+@testset "classvaluevalidation direct" begin
+    import HTMLForge: classvaluevalidation
+
+    # Valid class names
+    @test classvaluevalidation("my-class") == true
+    @test classvaluevalidation("  padded  ") == true  # stripped, non-empty
+
+    # Empty / whitespace-only
+    @test_throws ArgumentError classvaluevalidation("")
+    @test_throws ArgumentError classvaluevalidation("   ")
+
+    # Whitespace inside
+    @test_throws InvalidAttributeException classvaluevalidation("a b")
+end

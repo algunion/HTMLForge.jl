@@ -286,3 +286,71 @@ end
     bf_nodes = collect(breadthfirst(root))
     @test length(bf_nodes) >= 3
 end
+
+@testset "attrs direct" begin
+    el = HTMLElement(:div)
+    setattr!(el, "id", "test")
+    setattr!(el, "class", "foo")
+    a = attrs(el)
+    @test a isa Dict
+    @test a["id"] == "test"
+    @test a["class"] == "foo"
+end
+
+@testset "children of HTMLText" begin
+    t = HTMLText("hello")
+    @test HTMLForge.children(t) === ()
+    @test isempty(HTMLForge.children(t))
+end
+
+@testset "setindex! child parent already matches" begin
+    parent = HTMLElement(:div)
+    child = HTMLElement(:p)
+    push!(parent, child)
+    @test child.parent === parent
+    # setindex! where parent already matches — should not error
+    parent[1] = child
+    @test parent[1] === child
+    @test child.parent === parent
+end
+
+@testset "push! child parent already matches" begin
+    parent = HTMLElement(:div)
+    child = HTMLElement(:p)
+    push!(parent, child)
+    @test child.parent === parent
+    # push! again where parent already matches
+    push!(parent, child)
+    @test child.parent === parent
+    @test length(parent) == 2
+end
+
+@testset "setindex! attribute with invalid key" begin
+    el = HTMLElement(:div)
+    @test_throws ArgumentError (el[""]="val")
+    @test_throws HTMLForge.InvalidAttributeException (el["a b"]="val")
+    @test_throws HTMLForge.InvalidAttributeException (el["a>b"]="val")
+    # Symbol key validation
+    @test_throws HTMLForge.InvalidAttributeException (el[Symbol("a=b")]="val")
+end
+
+@testset "replaceclass! with invalid newclass" begin
+    el = HTMLElement(:div)
+    addclass!(el, "old")
+    @test_throws HTMLForge.InvalidAttributeException replaceclass!(el, "old", "a b")
+    # Class should still be "old" since validation threw before replacement
+    @test hasclass(el, "old")
+end
+
+@testset "body and head returning nothing" begin
+    # Element with no body or head children
+    el = HTMLElement(:div)
+    push!(el, HTMLElement(:p))
+    @test HTMLForge.body(el) === nothing
+    @test HTMLForge.head(el) === nothing
+
+    # Document with no body/head
+    doc = HTMLDocument("html", el)
+    @test HTMLForge.body(doc) === nothing
+    @test HTMLForge.head(doc) === nothing
+end

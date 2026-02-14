@@ -69,3 +69,24 @@ end
     doc = parsehtml("<pre>  spaces  </pre>", preserve_whitespace = true)
     @test doc isa HTMLForge.HTMLDocument
 end
+
+@testset "parsehtml_snippet with preserve_whitespace" begin
+    snip = parsehtml_snippet("<pre>  keep me  </pre>", preserve_whitespace = true)
+    @test tag(snip) == :pre
+end
+
+@testset "parsehtml_snippet with preserve_template" begin
+    # Verify the kwarg is accepted and passes through to parsehtml
+    snip = parsehtml_snippet(
+        "<div><template><p>inside</p></template></div>", preserve_template = true)
+    @test tag(snip) == :div
+    # With preserve_template=true, the template element should be preserved as a child
+    @test length(children(snip)) >= 1
+end
+
+@testset "parsehtml_snippet single text child" begin
+    snip = parsehtml_snippet("<span>hello</span>")
+    @test tag(snip) == :span
+    @test snip[1] isa HTMLForge.HTMLText
+    @test snip[1].text == "hello"
+end
