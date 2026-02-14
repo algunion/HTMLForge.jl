@@ -1,5 +1,7 @@
 # HTMLForge.jl
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://algunion.github.io/HTMLForge.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://algunion.github.io/HTMLForge.jl/dev/)
 [![codecov](https://codecov.io/gh/algunion/HTMLForge.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/algunion/HTMLForge.jl)
 
 HTMLForge.jl is a Julia wrapper around the
