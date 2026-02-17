@@ -1,6 +1,6 @@
 # HTMLForge.jl — LLM Reference
 
-> This page is a condensed, single-file reference for **HTMLForge.jl** (v0.3.12) optimized for LLM code-generation systems. It covers the full public API. Julia ≥ 1.8.
+> This page is a condensed, single-file reference for **HTMLForge.jl** (v0.3.13) optimized for LLM code-generation systems. It covers the full public API. Julia ≥ 1.8.
 
 ## Install
 
