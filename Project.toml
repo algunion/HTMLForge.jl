@@ -1,6 +1,6 @@
 name = "HTMLForge"
 uuid = "3f2c3872-777a-411d-b946-15b25a70da51"
-version = "0.3.12"
+version = "0.3.13"
 authors = ["Marius Fersigan <marius.fersigan@gmail.com> and contributors"]
 
 [deps]

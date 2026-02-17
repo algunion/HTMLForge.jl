@@ -22,7 +22,8 @@ makedocs(;
         "Traversal" => "traversal.md",
         "HTMX Support" => "htmx.md",
         "Experimental HTMX" => "experimental.md",
-        "API Reference" => "api.md"
+        "API Reference" => "api.md",
+        "LLM Reference" => "llm.md"
     ]
 )
 
